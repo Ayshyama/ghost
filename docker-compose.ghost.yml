@@ -22,6 +22,8 @@ services:
       mail__options__auth__user: ${mail__options__auth__user:-}
       mail__options__auth__pass: ${mail__options__auth__pass:-}
       mail__from: ${mail__from:-}
+      # Security - disable device verification
+      security__deviceVerification__enabled: ${security__deviceVerification__enabled:-false}
       # Node environment
       NODE_ENV: production
     volumes:
