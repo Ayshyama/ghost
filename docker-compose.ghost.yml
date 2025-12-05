@@ -1,11 +1,33 @@
 services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-ghost_root_password}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-ghost}
+      MYSQL_USER: ${MYSQL_USER:-ghost}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-ghost_password}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   ghost:
     image: ghost:5-alpine
     restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
     environment:
-      # Database configuration (using SQLite for simplicity)
-      database__client: sqlite3
-      database__connection__filename: /var/lib/ghost/content/data/ghost.db
+      # Database configuration - MySQL (recommended)
+      database__client: mysql2
+      database__connection__host: mysql
+      database__connection__user: ${MYSQL_USER:-ghost}
+      database__connection__password: ${MYSQL_PASSWORD:-ghost_password}
+      database__connection__database: ${MYSQL_DATABASE:-ghost}
       # URL configuration (will be set via environment variable in Dokploy)
       url: ${GHOST_URL}
       # Admin URL
@@ -42,5 +64,7 @@ services:
 
 volumes:
   ghost_data:
+    driver: local
+  mysql_data:
     driver: local
 
