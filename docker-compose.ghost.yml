@@ -10,10 +10,17 @@ services:
       url: ${GHOST_URL}
       # Admin URL
       admin__url: ${GHOST_URL}
-      # Mail configuration - leave empty/unset to work without email
-      # Ghost will work without email, but may show warnings (not errors)
-      # To enable email in production, set these in Dokploy:
-      # MAIL_TRANSPORT, MAIL_SERVICE (Mailgun/SendGrid), MAIL_USER, MAIL_PASS, MAIL_FROM
+      # Mail configuration - configure via Dokploy environment variables
+      # Required for Ghost 5 session authentication
+      # Set in Dokploy: mail__transport, mail__options__service, mail__options__host,
+      # mail__options__port, mail__options__auth__user, mail__options__auth__pass, mail__from
+      mail__transport: ${mail__transport:-}
+      mail__options__service: ${mail__options__service:-}
+      mail__options__host: ${mail__options__host:-}
+      mail__options__port: ${mail__options__port:-}
+      mail__options__auth__user: ${mail__options__auth__user:-}
+      mail__options__auth__pass: ${mail__options__auth__pass:-}
+      mail__from: ${mail__from:-}
       # Node environment
       NODE_ENV: production
     volumes:
