@@ -24,6 +24,8 @@ services:
       mail__from: ${mail__from:-}
       # Security - disable device verification
       security__deviceVerification__enabled: ${security__deviceVerification__enabled:-false}
+      # Trust proxy - required when behind reverse proxy (Dokploy/Traefik)
+      server__trust_proxy: ${server__trust_proxy:-true}
       # Node environment
       NODE_ENV: production
     volumes:
