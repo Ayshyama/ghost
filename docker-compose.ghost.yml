@@ -18,6 +18,7 @@ services:
       mail__options__service: ${mail__options__service:-}
       mail__options__host: ${mail__options__host:-}
       mail__options__port: ${mail__options__port:-}
+      mail__options__secure: ${mail__options__secure:-}
       mail__options__auth__user: ${mail__options__auth__user:-}
       mail__options__auth__pass: ${mail__options__auth__pass:-}
       mail__from: ${mail__from:-}
