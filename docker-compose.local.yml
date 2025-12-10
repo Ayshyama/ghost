@@ -1,0 +1,67 @@
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ghost_root_password
+      MYSQL_DATABASE: ghost
+      MYSQL_USER: ghost
+      MYSQL_PASSWORD: ghost_password
+    volumes:
+      - mysql_data_local:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - ghost-local
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ghost:
+    image: ghost:5-alpine
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # Database configuration
+      database__client: mysql2
+      database__connection__host: mysql
+      database__connection__user: ghost
+      database__connection__password: ghost_password
+      database__connection__database: ghost
+      # URL configuration for local development
+      url: http://localhost:2368
+      # Admin URL
+      admin__url: http://localhost:2368
+      # Development mode
+      NODE_ENV: development
+      # Security - disable device verification for local dev
+      security__deviceVerification__enabled: false
+    volumes:
+      - ghost_data_local:/var/lib/ghost/content
+      # Mount the theme directory for live development
+      - ./:/var/lib/ghost/content/themes/custom-casper
+    ports:
+      - "2368:2368"
+    networks:
+      - ghost-local
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:2368', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  ghost_data_local:
+    driver: local
+  mysql_data_local:
+    driver: local
+
+networks:
+  ghost-local:
+    driver: bridge
+
