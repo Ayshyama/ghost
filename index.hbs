@@ -1,132 +1,141 @@
 {{!< default}}
-{{!-- The tag above means: insert everything in this file
-into the {body} of the default.hbs template --}}
 
-<div class="site-header-content outer{{#match @custom.header_style "Left aligned"}} left-aligned{{/match}}{{#unless @custom.show_publication_cover}}{{#match @custom.header_style "Hidden"}} no-content{{/match}}{{/unless}}">
+<main id="gh-main" class="gh-main gh-outer">
+    <div class="gh-inner">
+        {{^is "paged"}}
+            {{#foreach posts limit="1"}}
+                <article class="gh-latest gh-card {{post_class}}">
+                    <a class="gh-card-link" href="{{url}}">
+                        <header class="gh-card-header">
+                            <div class="gh-article-meta">
+                                <span class="gh-card-date">Latest — <time datetime="{{date format="YYYY-MM-DD"}}">{{date format="DD MMM YYYY"}}</time></span>
+                            </div>
+                            <h2 class="gh-article-title gh-card-title">{{title}}</h2>
+                        </header>
 
-    {{#if @custom.show_publication_cover}}
-        {{#if @site.cover_image}}
-            {{!-- This is a responsive image, it loads different sizes depending on device
-            https://medium.freecodecamp.org/a-guide-to-responsive-images-with-ready-to-use-templates-c400bd65c433 --}}
-            <img class="site-header-cover"
-                srcset="{{img_url @site.cover_image size="s"}} 300w,
-                        {{img_url @site.cover_image size="m"}} 600w,
-                        {{img_url @site.cover_image size="l"}} 1000w,
-                        {{img_url @site.cover_image size="xl"}} 2000w"
-                sizes="100vw"
-                src="{{img_url @site.cover_image size="xl"}}"
-                alt="{{@site.title}}"
-            />
-        {{/if}}
-    {{/if}}
+                        <p class="gh-article-excerpt">{{excerpt}}</p>
 
-    {{#match @custom.header_style "!=" "Hidden"}}
-        <div class="site-header-inner inner">
-            {{#match @custom.navigation_layout "Logo on cover"}}
-                {{#if @site.logo}}
-                    <img class="site-logo" src="{{@site.logo}}" alt="{{@site.title}}">
-                {{else}}
-                    <h1 class="site-title">{{@site.title}}</h1>
+                        <footer class="gh-card-meta">
+                            <span class="gh-card-duration">{{reading_time}}</span>
+                            {{#if @site.comments_enabled}}
+                                {{comment_count class="gh-card-comments"}}
+                            {{/if}}
+                            {{^has visibility="public"}}
+                                {{> icons/star}}
+                            {{/has}}
+                        </footer>
+                    </a>
+                </article>
+            {{/foreach}}
+        {{/is}}
+
+        <div class="gh-wrapper">
+            <section class="gh-section">
+                <h2 class="gh-section-title">More issues</h2>
+
+                <div class="gh-feed">
+                    {{^is "paged"}}
+                        {{#foreach posts from="2"}}
+                            {{> loop}}
+                        {{/foreach}}
+                    {{else}}
+                        {{#foreach posts}}
+                            {{> loop}}
+                        {{/foreach}}
+                    {{/is}}
+                </div>
+
+                {{#match posts.length "=" 1}}
+                    Additional issues will be published soon.
+                {{/match}}
+
+                <button class="gh-loadmore gh-btn">Load more issues</button>
+            </section>
+
+            <aside class="gh-sidebar">
+                <section class="gh-section">
+                    <h2 class="gh-section-title">About</h2>
+
+                    <div class="gh-about">
+                        {{#if @site.icon}}
+                            <img class="gh-about-icon" src="{{@site.icon}}" alt="{{@site.title}}">
+                        {{/if}}
+
+                        <section class="gh-about-wrapper">
+                            <h3 class="gh-about-title">{{@site.title}}</h3>
+
+                            {{#if @site.description}}
+                                <p class="gh-about-description">{{@site.description}}</p>
+                            {{/if}}
+                        </section>
+                    </div>
+
+                    {{#if @site.members_enabled}}
+                        {{^if @member.paid}}
+                            <div class="gh-signup">
+                                {{^if @member}}
+                                    <p class="gh-signup-description">Sign up now to get access to the library of members-only issues.</p>
+
+                                    <a class="gh-subscribe-input" href="#/portal/signup" data-portal="signup">
+                                        <div class="gh-subscribe-input-text">
+                                            {{> icons/email}}
+                                            jamie@example.com
+                                        </div>
+                                        <div class="gh-subscribe-input-btn">Subscribe</div>
+                                    </a>
+                                {{else}}
+                                    {{#if @setting.paid_members_enabled}}
+                                        <p class="gh-signup-description">Upgrade to a paid account to get full access.</p>
+                                        <a class="gh-signup-btn gh-btn gh-primary-btn" href="#/portal/account/plans" data-portal="account/plans">Upgrade now</a>
+                                    {{/if}}
+                                {{/if}}
+                            </div>
+                        {{/if}}
+                    {{/if}}
+                </section>
+
+                {{#get "posts" filter="featured:true" limit="5" as |featured|}}
+                    {{#if featured}}
+                        <section class="gh-section">
+                            <h3 class="gh-section-title">Featured</h3>
+
+                            <div class="gh-featured gh-feed">
+                                {{#foreach featured}}
+                                    {{> loop}}
+                                {{/foreach}}
+                            </div>
+                        </section>
+                    {{/if}}
+                {{/get}}
+
+                {{#get "tags" include="count.posts" limit="100" as |topic|}}
+                    <section class="gh-section">
+                        <h3 class="gh-section-title">Topics</h3>
+
+                        <div class="gh-topic">
+                            {{#foreach topic}}
+                                <a class="gh-topic-item" href="{{url}}">
+                                    <h3 class="gh-topic-name">{{name}}</h3>
+                                    <span class="gh-topic-count">
+                                        {{plural count.posts empty="0 issues" singular="% issue" plural="% issues"}}
+                                    </span>
+                                </a>
+                            {{/foreach}}
+                        </div>
+                    </section>
+                {{/get}}
+
+                {{#if @site.recommendations_enabled}}
+                    <section class="gh-section">
+                        <h3 class="gh-section-title">Recommendations</h3>
+
+                        <div class="gh-recommendations">
+                            {{recommendations}}
+                            <button data-portal="recommendations">See all {{> "icons/arrow-right"}}</button>
+                        </div>
+                    </section>
                 {{/if}}
-            {{/match}}
-            {{#if @site.description}}
-                <p class="site-description">{{@site.description}}</p>
-            {{/if}}
+            </aside>
         </div>
-    {{/match}}
-
-</div>
-
-{{!-- The main content area --}}
-<main id="site-main" class="site-main outer">
-<div class="inner posts">
-
-    {{!-- TEST BLOCK: GitHub Actions Workflow Test with Modern Animations --}}
-    <style>
-        @keyframes gradient-shift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-        @keyframes slide-in-fade {
-            0% {
-                opacity: 0;
-                transform: translateY(-20px) scale(0.95);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-        @keyframes pulse-glow {
-            0%, 100% {
-                box-shadow: 0 0 20px rgba(62, 176, 239, 0.4);
-            }
-            50% {
-                box-shadow: 0 0 30px rgba(62, 176, 239, 0.8), 0 0 40px rgba(62, 176, 239, 0.4);
-            }
-        }
-        @keyframes shimmer {
-            0% { background-position: -1000px 0; }
-            100% { background-position: 1000px 0; }
-        }
-        .test-block-animated {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #667eea 100%);
-            background-size: 400% 400%;
-            animation: gradient-shift 8s ease infinite, slide-in-fade 0.8s ease-out, pulse-glow 3s ease-in-out infinite;
-            padding: 20px;
-            margin: 30px 0;
-            border-radius: 12px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            transform: translateZ(0);
-        }
-        .test-block-animated::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            animation: shimmer 3s infinite;
-        }
-        .test-block-animated p {
-            margin: 0;
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            position: relative;
-            z-index: 1;
-            letter-spacing: 0.5px;
-        }
-        .test-block-animated .emoji {
-            display: inline-block;
-            animation: bounce 2s ease-in-out infinite;
-        }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            25% { transform: translateY(-5px) rotate(-5deg); }
-            75% { transform: translateY(-5px) rotate(5deg); }
-        }
-    </style>
-    <div class="test-block-animated">
-        <p>
-            <span class="emoji">🚀</span> Theme deployment test successful via GitHub Actions! 
-            <span class="emoji">✨</span>
-        </p>
     </div>
-
-
-    <div class="post-feed">
-        {{#foreach posts}}
-            {{!-- The tag below includes the markup for each post - partials/post-card.hbs --}}
-            {{> "post-card"}}
-        {{/foreach}}
-    </div>
-
-    {{pagination}}
-
-</div>
 </main>
