@@ -656,3 +656,14 @@
         top: 1px;
     }
 }
+
+.gh-powered-by a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.gh-powered-by svg {
+    position: relative;
+    top: 1px;
+}
